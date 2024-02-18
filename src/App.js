@@ -1,25 +1,38 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import { EditorState,convertToRaw, convertFromRaw } from 'draft-js';
 import './App.css';
+import Title from './components/Title';
+import Btn from './components/Btn';
+import MyEditor from './components/Editor';
+
 
 function App() {
+  const [editorState, setEditorState] = useState(() => {
+    const content = window.localStorage.getItem('editorContent');
+    return content ?
+      EditorState.createWithContent(convertFromRaw(JSON.parse(content))) :
+      EditorState.createEmpty();
+  });
+
+  useEffect(() => {
+    const contentState = editorState.getCurrentContent();
+    localStorage.setItem('editorContent', JSON.stringify(convertToRaw(contentState)));
+  }, [editorState]);
+
+  const saveContent = () => {
+    const content = editorState.getCurrentContent();
+    window.localStorage.setItem('editorContent', JSON.stringify(convertToRaw(content)));
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Title text={'Draft.js Editor'}/>
+      <Btn onClick={saveContent} label="Save" />
+      <MyEditor editorState={editorState} setEditorState={setEditorState} />
     </div>
   );
 }
 
+
 export default App;
+
